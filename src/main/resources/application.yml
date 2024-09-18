@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: KokobatoDemo
+  devtools:
+    livereload:
+      enabled: true
+  datasource:
+    url: jdbc:mysql://192.168.30.77:3306/kobato_demo
+    username: eas
+    password: eas
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database: mysql
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  security:
+    saml2:
+      relyingparty:
+        registration:
+          okta:
+            assertingparty:
+              metadata-uri: https://dev-55392673.okta.com/app/exkjq2fhwvMrODg7V5d7/sso/saml/metadata
+            signing:
+              credentials:
+                certificate-location: classpath:local.crt
+                private-key-location: classpath:login.key
+            singlelogout:
+              binding: POST
+              response-url: "{baseUrl}/logout/saml2/slo"
+
+
+
+jwt:
+  expiration: 3600
+  secretKey: Q5g/Hs2VWwCaJbvNwkgalkXHq78DCL+e5QWis7WFNUg=
+
+
+server:
+  port: 8080
+  address: 0.0.0.0
