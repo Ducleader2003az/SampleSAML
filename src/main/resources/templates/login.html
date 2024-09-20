@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <title>Spring Boot and SAML</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>Login</h1>
+<form th:action="@{/login}" method="post">
+    <label for="username">Username: </label>
+    <input name="username" id="username" placeholder="Username" type="text"/>
+
+    <label for="password">Password: </label>
+    <input name="password" id="password" placeholder="Password" type="password"/>
+    <button id="login" type="submit">Submit</button>
+</form>
+
+</body>
+</html>

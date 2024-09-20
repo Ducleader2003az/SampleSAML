@@ -1,6 +1,6 @@
 package com.kokobato.huynhduc.kokobatodemo.config;
 
-//import com.kokobato.huynhduc.kokobatodemo.filters.JwtTokenFilter;
+import com.kokobato.huynhduc.kokobatodemo.filters.JwtTokenFilter;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +11,8 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml4AuthenticationProvider;
@@ -19,6 +21,10 @@ import org.springframework.security.saml2.provider.service.authentication.Saml2A
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -28,41 +34,52 @@ import java.util.List;
 import java.util.Set;
 
 @Configuration
-//@EnableWebSecurity
-//@RequiredArgsConstructor
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
-//    private final JwtTokenFilter jwtTokenFilter;
-//
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf().disable()
-//                .authorizeHttpRequests(request -> {
-//                    request.requestMatchers(
-//                            "/api/user/register",
-//                            "api/user/login"
-//                    ).permitAll();
-//                    request.requestMatchers("/api/user/list").hasRole("ADMIN")
-//                            .anyRequest().authenticated();
-//                })
-//                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
+    private final JwtTokenFilter jwtTokenFilter;
 
     @Bean
-    SecurityFilterChain configureWithSaml(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         OpenSaml4AuthenticationProvider provider = new OpenSaml4AuthenticationProvider();
         provider.setResponseAuthenticationConverter(groupsConverter());
+
         http
-                .csrf().disable()
-                .authorizeHttpRequests(request ->
-                        request.anyRequest().authenticated())
+                .csrf(CsrfConfigurer::disable)
+                .authorizeHttpRequests(request -> {
+                    request.requestMatchers(
+                            "/api/user/register",
+                            "api/user/login",
+                            "/login",
+                            "/auth/saml2"
+                    ).permitAll();
+                    request.requestMatchers("/home").authenticated();
+                })
                 .saml2Login(saml2 ->
-                        saml2.authenticationManager(new ProviderManager(provider))
+                        saml2.authenticationManager(new ProviderManager(provider)).defaultSuccessUrl("/login")
                 )
-                .saml2Logout(withDefaults());
+
+                .saml2Logout(withDefaults())
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurer() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://127.0.0.1");  // Cho phép các domain cụ thể
+        configuration.addAllowedMethod("GET");
+        configuration.addAllowedMethod("POST");
+        configuration.addAllowedMethod("PUT");
+        configuration.addAllowedMethod("DELETE");
+        configuration.addAllowedHeader("*");  // Cho phép tất cả các headers
+        configuration.setAllowCredentials(true);  // Cho phép gửi cookie hoặc thông tin xác thực
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);  // Áp dụng cấu hình cho endpoint bắt đầu bằng /api
+
+        return source;
     }
 
     private Converter<ResponseToken, Saml2Authentication> groupsConverter() {
