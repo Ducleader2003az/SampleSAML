@@ -51,7 +51,10 @@ public class WebConfig implements WebMvcConfigurer {
                             "/api/user/register",
                             "api/user/login",
                             "/login",
-                            "/auth/saml2"
+                            "/auth/saml2",
+                            "/api/company/findByFloorId",
+                            "/api/company/findByOfficeId",
+                            "/"
                     ).permitAll();
                     request.requestMatchers("/home").authenticated();
                 })

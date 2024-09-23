@@ -3,8 +3,10 @@ package com.kokobato.huynhduc.kokobatodemo.services;
 import com.kokobato.huynhduc.kokobatodemo.dtos.UserDTO;
 import com.kokobato.huynhduc.kokobatodemo.exceptions.DataNotFoundException;
 import com.kokobato.huynhduc.kokobatodemo.models.Role;
+import com.kokobato.huynhduc.kokobatodemo.models.Token;
 import com.kokobato.huynhduc.kokobatodemo.models.User;
 import com.kokobato.huynhduc.kokobatodemo.repositories.RoleRepository;
+import com.kokobato.huynhduc.kokobatodemo.repositories.TokenRepository;
 import com.kokobato.huynhduc.kokobatodemo.repositories.UserRepository;
 import com.kokobato.huynhduc.kokobatodemo.component.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,12 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final TokenRepository tokenRepository;
+
+    @Autowired
+    private final TokenService tokenService;
 
     @Autowired
     private final RoleRepository roleRepository;
@@ -56,7 +64,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public String login(String username, String password) throws Exception {
+    public Token login(String username, String password) throws Exception {
         Optional<User> userOptional = userRepository.findByUsername(username);
 
         if (username.isEmpty()) {
@@ -77,6 +85,10 @@ public class UserService {
 
         authenticationManager.authenticate(authenticationToken);
 
-        return jwtTokenUtil.generateToken(userOptional.get());
+        String token = jwtTokenUtil.generateToken(userOptional.get());
+
+        Token jwtToken = tokenService.addToken(existingUser, token);
+
+        return jwtToken;
     }
 }

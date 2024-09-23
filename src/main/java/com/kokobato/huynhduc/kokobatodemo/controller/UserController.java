@@ -3,6 +3,7 @@ package com.kokobato.huynhduc.kokobatodemo.controller;
 import com.kokobato.huynhduc.kokobatodemo.dtos.LoginRespone;
 import com.kokobato.huynhduc.kokobatodemo.dtos.UserDTO;
 import com.kokobato.huynhduc.kokobatodemo.dtos.UserLoginDTO;
+import com.kokobato.huynhduc.kokobatodemo.models.Token;
 import com.kokobato.huynhduc.kokobatodemo.models.User;
 import com.kokobato.huynhduc.kokobatodemo.services.UserService;
 import jakarta.validation.Valid;
@@ -51,12 +52,16 @@ public class UserController {
     @PostMapping("/user/login")
     public ResponseEntity<?> login(@RequestBody UserLoginDTO userLoginDTO) {
         try {
-            String token = userService.login(userLoginDTO.getUsername(), userLoginDTO.getPassword());
+            Token token = userService.login(userLoginDTO.getUsername(), userLoginDTO.getPassword());
 
             return ResponseEntity.ok().body(
                     LoginRespone.builder()
                             .message("Login Successfully")
-                            .token(token)
+                            .username(token.getUser().getUsername())
+                            .roles(token.getUser().getAuthorities().stream().map(a -> a.getAuthority()).toList())
+                            .refreshToken(token.getRefresh_token())
+                            .token(token.getToken())
+                            .userId(token.getUser().getId())
                             .build()
 
             );

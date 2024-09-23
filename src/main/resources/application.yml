@@ -23,7 +23,7 @@ spring:
           auth0:
             assertingparty:
               metadata-uri: https://dev-duckun1909.us.auth0.com/samlp/metadata/wKkBH5KsIb8yRY2Y7LBXIGTlcirvu2k7
-
+              entity-id: urn:dev-duckun1909.us.auth0.com
             signing:
               credentials:
                 certificate-location: classpath:local.crt

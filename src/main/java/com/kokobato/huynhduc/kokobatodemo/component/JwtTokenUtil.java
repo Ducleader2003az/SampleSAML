@@ -18,6 +18,7 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -31,13 +32,15 @@ public class JwtTokenUtil {
 
     public String generateToken(User user) {
         Map<String, String> claims = new HashMap<>(); // chứa các claim để mã hóa trong chuỗi token
-        claims.put("username", user.getUsername());
+        claims.put("email", user.getEmail());
 
         try {
             String token = Jwts.builder()
                     .setClaims(claims)
                     .setSubject(user.getUsername())
-                    .setExpiration(new Date(System.currentTimeMillis() * 1000L * expiration))
+                    .setId(UUID.randomUUID().toString())
+                    .setIssuedAt(new Date(System.currentTimeMillis()))
+                    .setExpiration(new Date(System.currentTimeMillis() + 1000L * expiration))
                     .signWith(getSignKey(), SignatureAlgorithm.HS256)
                     .compact();
 

@@ -1,4 +1,4 @@
-package com.kokobato.huynhduc.kokobatodemo.config;
+package com.kokobato.huynhduc.kokobatodemo.filters;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
